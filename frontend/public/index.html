@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShortLink - URL Shortener</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-md">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="/" class="text-2xl font-bold text-primary-600">Short<span class="text-gray-800">Link</span></a>
+      <div id="navLinksContainer">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+      <!-- Hero Section -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">Shorten Your URLs</h1>
+        <p class="text-gray-600 text-lg">Create short, memorable links in seconds.</p>
+      </div>
+
+      <!-- URL Shortener Form -->
+      <div class="card mb-8">
+        <form id="shortenForm" class="space-y-4">
+          <div>
+            <label for="originalUrl" class="block text-gray-700 font-medium mb-2">Enter Long URL</label>
+            <input type="url" id="originalUrl" name="originalUrl" placeholder="https://example.com/very/long/url" required 
+              class="input-field">
+          </div>
+          
+          <div id="customSlugContainer" class="hidden">
+            <label for="customSlug" class="block text-gray-700 font-medium mb-2">
+              Custom Slug (Optional)
+              <span class="text-xs text-gray-500 ml-1">Only letters, numbers, underscores and hyphens</span>
+            </label>
+            <input type="text" id="customSlug" name="customSlug" placeholder="my-custom-slug" 
+              pattern="^[a-zA-Z0-9_-]+$"
+              class="input-field">
+          </div>
+          
+          <div class="flex justify-end">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-link mr-2"></i>Shorten URL
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Result Card (Hidden by default) -->
+      <div id="resultCard" class="card hidden">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Your Shortened URL</h2>
+        
+        <div class="mb-4">
+          <label class="block text-gray-700 font-medium mb-2">Short URL</label>
+          <div class="flex">
+            <input type="text" id="shortUrl" readonly class="input-field rounded-r-none">
+            <button id="copyButton" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 border border-gray-300 rounded-r-md">
+              <i class="far fa-copy"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div class="text-sm font-medium text-gray-700 mb-1">QR Code</div>
+            <div id="qrCodeContainer" class="bg-white border border-gray-200 rounded-md p-4 text-center">
+              <!-- QR code will be added here -->
+            </div>
+          </div>
+          
+          <div>
+            <div class="text-sm font-medium text-gray-700 mb-1">Statistics</div>
+            <div class="bg-white border border-gray-200 rounded-md p-4">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600">Clicks:</span>
+                <span id="clicksCount" class="font-semibold">0</span>
+              </div>
+              <div class="flex justify-between items-center mt-2">
+                <span class="text-gray-600">Created:</span>
+                <span id="createdAt" class="font-semibold">Just now</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="loginPrompt" class="hidden mt-4 p-4 bg-blue-50 text-blue-800 rounded-md">
+          <p class="text-sm">
+            <i class="fas fa-info-circle mr-2"></i>
+            <span>Want to use custom slugs and manage your links?</span>
+            <a href="/login.html" class="font-medium underline">Log in</a> or 
+            <a href="/register.html" class="font-medium underline">Sign up</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- User's Links Section (visible when logged in) -->
+      <div id="userLinksSection" class="hidden mt-12">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Your Links</h2>
+        <div id="linksContainer" class="space-y-4">
+          <!-- Links will be added here by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t mt-12 py-6">
+    <div class="container mx-auto px-4 text-center text-gray-600">
+      <p>&copy; 2025 ShortLink - All Rights Reserved</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html> 
