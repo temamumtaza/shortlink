@@ -1,6 +1,6 @@
 // Constants
-const API_URL = 'http://localhost:3001/api';
-const BASE_URL = `${window.location.protocol}//${window.location.host}`;
+const API_URL = 'http://127.0.0.1:3001/api';
+const BASE_URL = 'http://127.0.0.1:3001';
 
 // DOM Elements
 const shortenForm = document.getElementById('shortenForm');
@@ -31,42 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initialize the app
 async function init() {
   // Check if user is logged in
-  await checkAuth();
+  currentUser = window.auth?.getCurrentUser() || null;
   
   // Update UI based on auth state
   updateAuthUI();
-}
-
-// Check if user is authenticated
-async function checkAuth() {
-  const token = localStorage.getItem('token');
   
-  if (!token) {
-    currentUser = null;
-    return;
-  }
-  
-  try {
-    const response = await fetch(`${API_URL}/me`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      currentUser = data.data;
-      
-      // If user is logged in, fetch their links
-      await fetchUserLinks();
-    } else {
-      // Invalid token
-      localStorage.removeItem('token');
-      currentUser = null;
-    }
-  } catch (error) {
-    console.error('Error checking authentication:', error);
-    currentUser = null;
+  // If user is logged in, fetch their links
+  if (currentUser) {
+    await fetchUserLinks();
   }
 }
 
@@ -116,20 +88,39 @@ function updateAuthUI() {
 // Set up event listeners
 function setupEventListeners() {
   // Form submission
-  shortenForm.addEventListener('submit', handleShortenFormSubmit);
+  if (shortenForm) {
+    shortenForm.addEventListener('submit', handleShortenFormSubmit);
+  }
   
   // Copy button
-  copyButton.addEventListener('click', copyShortUrl);
+  if (copyButton) {
+    copyButton.addEventListener('click', copyShortUrl);
+  }
 }
 
 // Handle form submission to shorten URL
 async function handleShortenFormSubmit(e) {
   e.preventDefault();
   
-  const originalUrl = originalUrlInput.value.trim();
+  let originalUrl = originalUrlInput.value.trim();
   const customSlug = customSlugInput.value.trim();
   
   if (!originalUrl) {
+    alert('Please enter a URL');
+    return;
+  }
+
+  // URL validation regex (matching backend requirements exactly)
+  const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+
+  // Add https:// if no protocol is specified
+  if (!originalUrl.startsWith('http://') && !originalUrl.startsWith('https://')) {
+    originalUrl = 'https://' + originalUrl;
+  }
+
+  // Validate URL format
+  if (!urlRegex.test(originalUrl)) {
+    alert('Please enter a valid URL (e.g., example.com or https://example.com)');
     return;
   }
   

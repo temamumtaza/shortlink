@@ -1,4 +1,19 @@
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+
+// Helper function to generate JWT token
+const generateToken = (userId) => {
+  try {
+    return jwt.sign(
+      { id: userId },
+      process.env.JWT_SECRET || 'fallback_secret_key',
+      { expiresIn: process.env.JWT_EXPIRE || '7d' }
+    );
+  } catch (error) {
+    console.error('Error generating token:', error);
+    throw new Error('Failed to generate authentication token');
+  }
+};
 
 // @desc    Register user
 // @route   POST /api/register
@@ -32,7 +47,7 @@ exports.register = async (req, res) => {
     });
     
     // Generate token
-    const token = user.getSignedJwtToken();
+    const token = generateToken(user._id);
     
     res.status(201).json({
       success: true,
@@ -43,9 +58,10 @@ exports.register = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: 'Server error during registration',
       error: error.message
     });
   }
@@ -66,10 +82,13 @@ exports.login = async (req, res) => {
       });
     }
     
+    console.log('Attempting login for email:', email);
+    
     // Check for user
     const user = await User.findOne({ email }).select('+password');
     
     if (!user) {
+      console.log('User not found:', email);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -80,27 +99,39 @@ exports.login = async (req, res) => {
     const isMatch = await user.matchPassword(password);
     
     if (!isMatch) {
+      console.log('Password mismatch for user:', email);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
     
-    // Generate token
-    const token = user.getSignedJwtToken();
-    
-    res.status(200).json({
-      success: true,
-      token,
-      user: {
-        id: user._id,
-        email: user.email
-      }
-    });
+    try {
+      // Generate token
+      const token = generateToken(user._id);
+      
+      console.log('Login successful for user:', email);
+      
+      res.status(200).json({
+        success: true,
+        token,
+        user: {
+          id: user._id,
+          email: user.email
+        }
+      });
+    } catch (tokenError) {
+      console.error('Token generation error:', tokenError);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to generate authentication token'
+      });
+    }
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: 'Server error during login',
       error: error.message
     });
   }
@@ -113,6 +144,13 @@ exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
     res.status(200).json({
       success: true,
       data: {
@@ -122,6 +160,7 @@ exports.getMe = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Get user error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
